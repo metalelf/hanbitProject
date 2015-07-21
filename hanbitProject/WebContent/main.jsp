@@ -12,7 +12,6 @@
 String cotextPath = request.getContextPath();
 %>
     <% response.sendRedirect(cotextPath+"/board/main.do"); %>
-    
     <!-- /WEB-INF/view/index.jsp 로 이동한다-->
 </body>
 </html>

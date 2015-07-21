@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/util 
+		http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+	
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/board/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSource" />
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close"
+		p:driverClassName="oracle.jdbc.driver.OracleDriver"
+		p:url="jdbc:oracle:thin:localhost:1521:orcl?useUnicode=true&amp;characterEncoding=euckr"
+		p:username="scott"
+		p:password="tiger" />
+    
+    <bean id="classDAO" class="cl.dao.ClassDAO">
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+    
+    <!-- controller -->
+	<bean class="cl.controller.ClassController" 
+	    p:listService-ref="listService"
+	    p:readService-ref="readService"
+	    p:writeService-ref="writeService"
+	    p:deleteService-ref="deleteService"
+	    p:updateService-ref="updateService"
+	    p:buyService-ref="buyService"
+	    p:buyListService-ref="buyListService"
+	    p:buyDeleteService-ref="buyDeleteService"
+	    />
+	
+	<!-- List Service 등록 -->
+	<bean id="listService" class="cl.service.ListService" p:classDAO-ref="classDAO" />
+	<bean id="readService" class="cl.service.ReadService" p:classDAO-ref="classDAO" />
+	<bean id="writeService" class="cl.service.WriteService" p:classDAO-ref="classDAO" />
+	<bean id="deleteService" class="cl.service.DeleteService" p:classDAO-ref="classDAO" />
+	<bean id="updateService" class="cl.service.UpdateService" p:classDAO-ref="classDAO" />
+	<bean id="buyService" class="cl.service.BuyService" p:classDAO-ref="classDAO" />
+	<bean id="buyListService" class="cl.service.BuyListService" p:classDAO-ref="classDAO" />
+	<bean id="buyDeleteService" class="cl.service.BuyDeleteService" p:classDAO-ref="classDAO" />
+	
+	<bean id="articleDao" class="board.dao.ArticleDao">
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+	
+	<bean id="testDAO" class="board.model.TestDAO" />
+	
+	<!-- controller -->
+	<bean class="board.controller.BoardController"
+		p:listArticleService-ref="listArticleService"
+		
+		p:writeArticleService-ref="writeArticleService"
+		p:deleteArticleService-ref="deleteArticleService"
+		p:updateArticleService-ref="updateArticleService"
+		p:replyArticleService-ref="replyArticleService"
+		p:testDAO-ref="testDAO"
+		/>
+	
+	<!-- List Service 등록 -->
+	<bean id="listArticleService" class="board.service.ListArticleService" p:articleDao-ref="articleDao" />
+	
+	<!-- Read Service 등록 -->
+	<bean id="readArticleService" class="board.service.ReadArticleService" p:articleDao-ref="articleDao" />
+	
+	<!-- Write SErvice 등록 -->
+	<bean id="writeArticleService" class="board.service.WriteArticleService" p:articleDao-ref="articleDao" p:idGenerator-ref="idGenerator" />
+	
+	<!-- idGenerator class 등록 -->
+	<bean id="idGenerator" class="board.service.IdGenerator">
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+	
+	<!-- Delete Service 등록 -->
+	<bean id="deleteArticleService" class="board.service.DeleteArticleService" p:articleDao-ref="articleDao" p:articleCheckHelper-ref="articleCheckHelper" />
+	
+	<!-- articleCheckHelper class 등록 -->
+	<bean id="articleCheckHelper" class="board.service.ArticleCheckHelper" p:articleDao-ref="articleDao" />
+	
+	<!-- Update Service 등록 -->
+	<bean id="updateArticleService" class="board.service.UpdateArticleService" p:articleDao-ref="articleDao" p:articleCheckHelper-ref="articleCheckHelper" />
+	
+	<!-- Reply Service 등록 -->
+	<bean id="replyArticleService" class="board.service.ReplyArticleService" p:articleDao-ref="articleDao" />
+	
+	<bean id="memberDao" class="member.dao.MemberDao">
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+	
+	<!-- DefaultMessageCodesResolver는 MessageSource로 부터 에러 코드에 해당하는 메시지를 로딩 -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>message.validation</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Controller, Service, 기타 Class 등록 시작 -->
+
+	<!-- 컨트롤러 등록 -->
+	<bean class="member.controller.MemberController"
+		p:joinMemberService-ref="joinMemberService" p:loginMemberService-ref="loginMemberService"
+		p:listMemberService-ref="listMemberService" p:readMemberService-ref="readMemberService"
+		p:deleteMemberService-ref="deleteMemberService"
+		p:updateMemberService-ref="updateMemberService"
+		p:checkMemberService-ref="checkMemberService" />
+
+
+	<!-- JoinMemberService 등록 -->
+	<bean id="joinMemberService" class="member.service.JoinMemberService"
+		p:memberDao-ref="memberDao" />
+
+	<!-- loginMemberService 등록 -->
+	<bean id="loginMemberService" class="member.service.LoginMemberService"
+		p:memberDao-ref="memberDao" />
+
+	<!-- listMemberService 등록 -->
+	<bean id="listMemberService" class="member.service.ListMemberService"
+		p:memberDao-ref="memberDao" />
+
+	<!-- readMemberService 등록 -->
+	<bean id="readMemberService" class="member.service.ReadMemberService"
+		p:memberDao-ref="memberDao" />
+
+	<!-- deleteMemberService 등록 -->
+	<bean id="deleteMemberService" class="member.service.DeleteMemberService"
+		p:memberDao-ref="memberDao" p:memberCheckHelper-ref="memberCheckHelper" />
+
+	<!-- updateMemberService 등록 -->
+	<bean id="updateMemberService" class="member.service.UpdateMemberService"
+		p:memberDao-ref="memberDao" />
+
+	<!-- checkMemberService 등록 -->
+	<bean id="checkMemberService" class="member.service.CheckMemberService"
+		p:memberCheckHelper-ref="memberCheckHelper" />
+
+	<!-- memberCheckHelper 등록 -->
+	<bean id="memberCheckHelper" class="member.service.MemberCheckHelper"
+		p:memberDao-ref="memberDao" />
+    
+</beans>
